@@ -1,4 +1,4 @@
-name: .NET
+name: POI API CI Pipeline
 
 on:
   push:
