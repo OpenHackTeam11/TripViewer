@@ -1,7 +1,6 @@
 name: POI API CI Pipeline
 
 on:
-  workflow_dispatch:
   push:
     paths:
     - 'apis/poi/**'
