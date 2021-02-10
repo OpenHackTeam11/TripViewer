@@ -1,6 +1,6 @@
 name: POI API CI/CD Pipeline
 env: 
-  working-directory: ./apis/poi
+  working-directory: apis/poi/
   acr-name: openhackfwl15lz6acr
   deploy-ref: refs/heads/master
   repository-name: devopsoh/api-poi
@@ -50,6 +50,14 @@ jobs:
         IterationPath: "TripViewer"
         GithubToken: "GithubToken"
         WorkflowFileName: "poi-api-ci-pipeline.yml"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v2
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      with:
+        name: build
+        path: ${{ env.working-directory }}web/
+        
     
   push-acr:
     runs-on: ubuntu-latest
@@ -57,6 +65,11 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
+    - name: Download build
+      uses: actions/download-artifact@v2
+      with:
+        name: build
+      
     - name: Log in with Azure
       uses: azure/login@v1
       with:
@@ -64,7 +77,6 @@ jobs:
 
     - name: Build/Push Docker Container
       run: az acr build --image "${{ env.repository-name }}:${{ github.run_number }}" --registry ${{ env.acr-name }} --file Dockerfile .
-      working-directory: ${{ env.working-directory }}/web
       
     - name: Create Bug for Failed Docker Build/Push
       uses: stefanstranger/azuredevops-bug-action@1.1
