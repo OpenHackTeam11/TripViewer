@@ -53,20 +53,20 @@ jobs:
         WorkflowFileName: "poi-api-ci-pipeline.yml"
     
     - name: Log in with Azure
-      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: azure/login@v1
       with:
         creds: '${{ secrets.AZURE_APP_LOGIN }}'
 
     - name: Build/Push Docker Container
-      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: az acr build --image "${{ env.repository-name }}:${{ github.run_number }}" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
     
     - name: Deploy Container to App Service
-      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.app-service-name }}
         slot-name: ${{ env.slot-name }}
-        images: ${{ env.repository-name }}:${{ github.run_number }}
+        images: ${{ env.acr-name }}.azurecr.io/${{ env.repository-name }}:${{ github.run_number }}
