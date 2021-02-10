@@ -66,6 +66,18 @@ jobs:
       run: az acr build --image "${{ env.repository-name }}:${{ github.run_number }}" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
       
+    - name: Create Bug for Failed Docker Build/Push
+      uses: stefanstranger/azuredevops-bug-action@1.1
+      if: failure()
+      with:
+        OrganizationName: "hacker1dn2"
+        PAT: "PAT"
+        ProjectName: "TripViewer"
+        AreaPath: "TripViewer"
+        IterationPath: "TripViewer"
+        GithubToken: "GithubToken"
+        WorkflowFileName: "poi-api-ci-pipeline.yml"
+      
   deploy-staging:
     runs-on: ubuntu-latest
     needs: [push-acr]
@@ -78,3 +90,15 @@ jobs:
         app-name: ${{ env.app-service-name }}
         slot-name: ${{ env.slot-name }}
         images: ${{ env.acr-name }}.azurecr.io/${{ env.repository-name }}:${{ github.run_number }}
+    
+    - name: Create Bug for Failed Deploy
+      uses: stefanstranger/azuredevops-bug-action@1.1
+      if: failure()
+      with:
+        OrganizationName: "hacker1dn2"
+        PAT: "PAT"
+        ProjectName: "TripViewer"
+        AreaPath: "TripViewer"
+        IterationPath: "TripViewer"
+        GithubToken: "GithubToken"
+        WorkflowFileName: "poi-api-ci-pipeline.yml"
