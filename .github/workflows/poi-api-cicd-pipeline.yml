@@ -18,6 +18,7 @@ jobs:
       repository-name: devopsoh/api-poi
       PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
       GithubToken: ${{ secrets.GITHUB_TOKEN}}
+      app-service-name: ${{ env.repository-name }}:$GITHUB_RUN_NUMBER
 
     runs-on: ubuntu-latest
 
@@ -51,18 +52,19 @@ jobs:
         WorkflowFileName: "poi-api-ci-pipeline.yml"
     
     - name: Log in with Azure
-      if: github.ref == ${{ env.deploy-ref }}
+      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
       uses: azure/login@v1
       with:
         creds: '${{ secrets.AZURE_APP_LOGIN }}'
 
     - name: Build/Push Docker Container
-      if: github.ref == ${{ env.deploy-ref }}
+      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
       run: az acr build --image "${{ env.repository-name }}:$GITHUB_RUN_NUMBER" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
     
     - name: Deploy Container to App Service
+      if: github.ref == ${{ env.deploy-ref }} && github.event_name == 'push'
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'openhackfwl15lz6poi'
-        images: '${{ env.repository-name }}:$GITHUB_RUN_NUMBER'
+        app-name: ${{ env.app-service-name }}
+        images: ${{ env.repository-name }}:$GITHUB_RUN_NUMBER
