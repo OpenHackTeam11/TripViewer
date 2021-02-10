@@ -96,6 +96,11 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
+    - name: Log in with Azure
+      uses: azure/login@v1
+      with:
+        creds: '${{ secrets.AZURE_APP_LOGIN }}'
+    
     - name: Deploy Container to App Service
       uses: azure/webapps-deploy@v2
       with:
