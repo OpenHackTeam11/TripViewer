@@ -60,4 +60,9 @@ jobs:
       if: github.ref == ${{ env.deploy-ref }}
       run: az acr build --image "${{ env.repository-name }}:$GITHUB_RUN_NUMBER" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
-      
+    
+    - name: Deploy Container to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'openhackfwl15lz6poi'
+        images: '${{ env.repository-name }}:$GITHUB_RUN_NUMBER'
