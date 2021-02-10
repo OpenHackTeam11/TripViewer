@@ -58,6 +58,6 @@ jobs:
 
     - name: Build/Push Docker Container
       if: github.ref == ${{ env.deploy-ref }}
-      run: az acr build --image "${{ env.repository-name }}:${{ env.GITHUB_RUN_NUMBER }}" --registry ${{ env.acr-name }} --file Dockerfile .
+      run: az acr build --image "${{ env.repository-name }}:$GITHUB_RUN_NUMBER" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
       
