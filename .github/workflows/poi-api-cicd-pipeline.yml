@@ -19,6 +19,7 @@ jobs:
       PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
       GithubToken: ${{ secrets.GITHUB_TOKEN}}
       app-service-name: openhackfwl15lz6poi
+      slot-name: staging
 
     runs-on: ubuntu-latest
 
@@ -67,4 +68,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.app-service-name }}
+        slot-name: ${{ env.slot-name }}
         images: ${{ env.repository-name }}:${{ github.run_number }}
