@@ -14,6 +14,10 @@ jobs:
     env: 
       working-directory: ./apis/poi
       acr-name: openhackfwl15lz6acr
+      deploy-ref: refs/heads/master
+      repository-name: devopsoh/api-poi
+      PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
+      GithubToken: ${{ secrets.GITHUB_TOKEN}}
 
     runs-on: ubuntu-latest
 
@@ -45,17 +49,15 @@ jobs:
         IterationPath: "TripViewer"
         GithubToken: "GithubToken"
         WorkflowFileName: "poi-api-ci-pipeline.yml"
-      env:
-        PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
-        GithubToken: ${{ secrets.GITHUB_TOKEN}}
     
     - name: Log in with Azure
+      if: github.ref == ${{ env.deploy-ref }}
       uses: azure/login@v1
       with:
         creds: '${{ secrets.AZURE_APP_LOGIN }}'
 
     - name: Build/Push Docker Container
-      if: github.ref == 'refs/heads/master'
-      run: az acr build --image "devopsoh/api-poi:${{ env.GITHUB_RUN_NUMBER }}" --registry ${{ env.acr-name }} --file Dockerfile .
+      if: github.ref == ${{ env.deploy-ref }}
+      run: az acr build --image "${{ env.repository-name }}:${{ env.GITHUB_RUN_NUMBER }}" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
       
