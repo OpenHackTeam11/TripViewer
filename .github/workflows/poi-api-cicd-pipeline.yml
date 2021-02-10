@@ -18,7 +18,7 @@ jobs:
       repository-name: devopsoh/api-poi
       PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
       GithubToken: ${{ secrets.GITHUB_TOKEN}}
-      app-service-name: ${{ env.repository-name }}:$GITHUB_RUN_NUMBER
+      app-service-name: openhackfwl15lz6poi
 
     runs-on: ubuntu-latest
 
