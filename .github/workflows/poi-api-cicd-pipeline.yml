@@ -1,4 +1,13 @@
 name: POI API CI/CD Pipeline
+env: 
+  working-directory: ./apis/poi
+  acr-name: openhackfwl15lz6acr
+  deploy-ref: refs/heads/master
+  repository-name: devopsoh/api-poi
+  PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
+  GithubToken: ${{ secrets.GITHUB_TOKEN}}
+  app-service-name: openhackfwl15lz6poi
+  slot-name: staging
 
 on:
   push:
@@ -11,16 +20,6 @@ on:
       
 jobs: 
   build:
-    env: 
-      working-directory: ./apis/poi
-      acr-name: openhackfwl15lz6acr
-      deploy-ref: refs/heads/master
-      repository-name: devopsoh/api-poi
-      PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
-      GithubToken: ${{ secrets.GITHUB_TOKEN}}
-      app-service-name: openhackfwl15lz6poi
-      slot-name: staging
-
     runs-on: ubuntu-latest
 
     steps:
@@ -52,19 +51,28 @@ jobs:
         GithubToken: "GithubToken"
         WorkflowFileName: "poi-api-ci-pipeline.yml"
     
+  push-acr:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
     - name: Log in with Azure
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: azure/login@v1
       with:
         creds: '${{ secrets.AZURE_APP_LOGIN }}'
 
     - name: Build/Push Docker Container
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: az acr build --image "${{ env.repository-name }}:${{ github.run_number }}" --registry ${{ env.acr-name }} --file Dockerfile .
       working-directory: ${{ env.working-directory }}/web
+      
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [push-acr]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
+    steps:
     - name: Deploy Container to App Service
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.app-service-name }}
