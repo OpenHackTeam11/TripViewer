@@ -1,4 +1,4 @@
-name: POI API CI Pipeline
+name: POI API CI/CD Pipeline
 
 on:
   push:
@@ -10,10 +10,10 @@ on:
     - 'apis/poi/**'
       
 jobs: 
-   
   build:
     env: 
       working-directory: ./apis/poi
+      acr-name: openhackfwl15lz6acr
 
     runs-on: ubuntu-latest
 
@@ -48,4 +48,14 @@ jobs:
       env:
         PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
         GithubToken: ${{ secrets.GITHUB_TOKEN}}
+    
+    - name: Log in with Azure
+      uses: azure/login@v1
+      with:
+        creds: '${{ secrets.AZURE_APP_LOGIN }}'
+
+    - name: Build/Push Docker Container
+      if: github.ref == 'refs/heads/master'
+      run: az acr build --image "devopsoh/api-poi:${{ env.GITHUB_RUN_NUMBER }}" --registry ${{ env.acr-name }} --file Dockerfile .
+      working-directory: ${{ env.working-directory }}/web
       
