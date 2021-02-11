@@ -2,7 +2,7 @@ name: POI API CI/CD Pipeline
 env: 
   working-directory: apis/poi/
   acr-name: openhackfwl15lz6acr
-  resouce-group: openhackfwl15lz6rg
+  resource-group: openhackfwl15lz6rg
   app-service-name: openhackfwl15lz6poi
   deploy-ref: refs/heads/master
   repository-name: devopsoh/api-poi
