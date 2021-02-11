@@ -149,7 +149,7 @@ jobs:
           az webapp config container show -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot staging > container-config.txt
           imageName='api-poi:${{ github.run_number}}'
           grep $imageName container-config.txt > container-out.txt
-          theFileSize=${wc -c container-out.txt | awk '{print $1}'}
+          theFileSize=$(wc -c container-out.txt | awk '{print $1}')
           echo $theFileSize
           if (("0" == "$theFileSize")); then
             exit 1
@@ -207,7 +207,7 @@ jobs:
           az webapp config container show -g ${{ env.resource-group }} -n ${{ env.app-service-name }} > container-config.txt
           imageName='api-poi:${{ github.run_number}}'
           grep $imageName container-config.txt > container-out.txt
-          theFileSize=${wc -c container-out.txt | awk '{print $1}'}
+          theFileSize=$(wc -c container-out.txt | awk '{print $1}')
           echo $theFileSize
           if (("0" == "$theFileSize")); then
             exit 1
