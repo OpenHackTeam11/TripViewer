@@ -2,11 +2,12 @@ name: POI API CI/CD Pipeline
 env: 
   working-directory: apis/poi/
   acr-name: openhackfwl15lz6acr
+  resouce-group: openhackfwl15lz6rg
+  app-service-name: openhackfwl15lz6poi
   deploy-ref: refs/heads/master
   repository-name: devopsoh/api-poi
   PAT: ${{ secrets.AZURE_DEVOPS_ACCESS_TOKEN }}
   GithubToken: ${{ secrets.GITHUB_TOKEN}}
-  app-service-name: openhackfwl15lz6poi
   slot-name: staging
 
 on:
@@ -134,3 +135,58 @@ jobs:
           max-attempts: 8 # Optional, defaults to 1
           # Delay between retries
           retry-delay: 15s # Optional, only applicable to max-attempts > 1
+
+      - name: Create Bug for Failed Staging validation
+        uses: stefanstranger/azuredevops-bug-action@1.1
+        if: failure()
+        with:
+          OrganizationName: "hacker1dn2"
+          PAT: "PAT"
+          ProjectName: "TripViewer"
+          AreaPath: "TripViewer"
+          IterationPath: "TripViewer"
+          GithubToken: "GithubToken"
+          WorkflowFileName: "poi-api-ci-pipeline.yml"
+      
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [validate-staging]
+    steps:
+      - name: Swap staging/production deployment slots
+        run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot staging --target-slot production
+  
+  validate-production:
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    steps:
+      - name: Check the deployed service URL
+        uses: jtalk/url-health-check-action@v1.4
+        with:
+          # Check the following URLs one by one sequentially
+          url: https://openhackfwl15lz6poi.azurewebsites.net/api/healthcheck/poi
+          # Follow redirects, or just report success on 3xx status codes
+          follow-redirect: no # Optional, defaults to "no"
+          # Fail this action after this many failed attempts
+          max-attempts: 8 # Optional, defaults to 1
+          # Delay between retries
+          retry-delay: 15s # Optional, only applicable to max-attempts > 1
+
+      - name: Create Bug for Failed Production validation
+        uses: stefanstranger/azuredevops-bug-action@1.1
+        if: failure()
+        with:
+          OrganizationName: "hacker1dn2"
+          PAT: "PAT"
+          ProjectName: "TripViewer"
+          AreaPath: "TripViewer"
+          IterationPath: "TripViewer"
+          GithubToken: "GithubToken"
+          WorkflowFileName: "poi-api-ci-pipeline.yml"
+      
+  rollback-production:
+      runs-on: ubuntu-latest
+      needs: [validate-production]
+      if: (needs.validate-production.outputs.job_status == 'failure')
+      steps:
+        - name: Swap staging/production deployment slots
+          run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot production --target-slot staging
