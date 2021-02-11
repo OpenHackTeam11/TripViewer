@@ -57,8 +57,7 @@ jobs:
       with:
         name: build
         path: ${{ env.working-directory }}web/
-        
-    
+          
   push-acr:
     runs-on: ubuntu-latest
     needs: [build]
@@ -120,8 +119,9 @@ jobs:
         GithubToken: "GithubToken"
         WorkflowFileName: "poi-api-ci-pipeline.yml"
         
-  verify-healthcheck:
-    runs-on: ubuntu-latest   
+  validate-staging:
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
     steps:
       - name: Check the deployed service URL
         uses: jtalk/url-health-check-action@v1.4
