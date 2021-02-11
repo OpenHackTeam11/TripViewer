@@ -167,6 +167,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-production]
     steps:
+      - name: Test Failure
+        run: exit 1
+      
       - name: Check the deployed service URL
         uses: jtalk/url-health-check-action@v1.4
         with:
