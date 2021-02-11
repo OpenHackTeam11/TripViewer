@@ -218,7 +218,7 @@ jobs:
             creds: '${{ secrets.AZURE_APP_LOGIN }}'
         
         - name: Swap staging/production deployment slots
-          run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot production --target-slot staging
+          run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot staging --target-slot production
           
         - name: Create Bug for Failed Production validation
           uses: stefanstranger/azuredevops-bug-action@1.1
