@@ -119,3 +119,12 @@ jobs:
         IterationPath: "TripViewer"
         GithubToken: "GithubToken"
         WorkflowFileName: "poi-api-ci-pipeline.yml"
+        
+  verify-healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run polling shell script 
+        working-directory: .github/workflows/
+        run: ./polling.sh https://openhackfwl15lz6poi-staging.azurewebsites.net/api/healthcheck/poi
+        timeout-minutes: 5
+        
