@@ -110,9 +110,6 @@ jobs:
         
     - name: Start staging app service 
       run: az webapp start -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot staging
-        
-    - name: Wait for Azure
-      run: sleep 60
     
     - name: Create Bug for Failed Deploy
       uses: stefanstranger/azuredevops-bug-action@1.1
