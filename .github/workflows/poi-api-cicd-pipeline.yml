@@ -107,6 +107,9 @@ jobs:
         app-name: ${{ env.app-service-name }}
         slot-name: ${{ env.slot-name }}
         images: ${{ env.acr-name }}.azurecr.io/${{ env.repository-name }}:${{ github.run_number }}
+        
+    - name: Wait for Azure
+      run: sleep 60
     
     - name: Create Bug for Failed Deploy
       uses: stefanstranger/azuredevops-bug-action@1.1
@@ -152,6 +155,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-staging]
     steps:
+      - name: Log in with Azure
+        uses: azure/login@v1
+        with:
+          creds: '${{ secrets.AZURE_APP_LOGIN }}'
+        
       - name: Swap staging/production deployment slots
         run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot staging --target-slot production
   
@@ -188,5 +196,10 @@ jobs:
       needs: [validate-production]
       if: (needs.validate-production.outputs.job_status == 'failure')
       steps:
+        - name: Log in with Azure
+          uses: azure/login@v1
+          with:
+            creds: '${{ secrets.AZURE_APP_LOGIN }}'
+        
         - name: Swap staging/production deployment slots
           run: az webapp deployment slot swap -g ${{ env.resource-group }} -n ${{ env.app-service-name }} --slot production --target-slot staging
